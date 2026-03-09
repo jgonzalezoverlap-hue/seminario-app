@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Congreso App</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --granate: #7B1D2E;
+    --granate-dark: #550F1C;
+    --granate-light: #9B2D3E;
+    --granate-pale: #F5E8EA;
+    --gold: #C9A84C;
+    --cream: #FAF7F2;
+    --text: #1A0A0D;
+    --text-mid: #5A3A40;
+    --text-light: #9A7A80;
+    --white: #FFFFFF;
+    --border: rgba(123,29,46,0.12);
+    --shadow: 0 8px 32px rgba(123,29,46,0.12);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── SPLASH / LOGIN ── */
+  #splash {
+    position: fixed; inset: 0; z-index: 100;
+    background: var(--granate-dark);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  #splash.hidden { opacity: 0; transform: translateY(-20px); pointer-events: none; }
+
+  .splash-ornament {
+    width: 60px; height: 2px;
+    background: var(--gold);
+    margin-bottom: 32px;
+  }
+  .splash-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 42px; font-weight: 300;
+    color: var(--white); letter-spacing: 2px;
+    text-align: center; line-height: 1.2;
+    margin-bottom: 6px;
+  }
+  .splash-sub {
+    font-size: 12px; letter-spacing: 4px;
+    color: var(--gold); text-transform: uppercase;
+    margin-bottom: 48px;
+  }
+
+  .login-box {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 16px;
+    padding: 36px 32px;
+    width: 320px;
+    backdrop-filter: blur(10px);
+  }
+  .login-box label {
+    display: block;
+    font-size: 11px; letter-spacing: 2px;
+    color: rgba(255,255,255,0.5);
+    text-transform: uppercase; margin-bottom: 8px;
+  }
+  .login-box input {
+    width: 100%; padding: 12px 16px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 8px;
+    color: white; font-family: 'DM Sans', sans-serif;
+    font-size: 14px; margin-bottom: 20px;
+    outline: none; transition: border 0.2s;
+  }
+  .login-box input:focus { border-color: var(--gold); }
+  .login-box input::placeholder { color: rgba(255,255,255,0.25); }
+
+  .btn-primary {
+    width: 100%; padding: 14px;
+    background: var(--gold);
+    border: none; border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px; font-weight: 500;
+    letter-spacing: 1.5px; text-transform: uppercase;
+    color: var(--granate-dark); cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-primary:hover { background: #dfc068; transform: translateY(-1px); }
+
+  /* ── APP SHELL ── */
+  #app { display: none; flex-direction: column; min-height: 100vh; }
+  #app.visible { display: flex; }
+
+  /* ── TOP BAR ── */
+  .topbar {
+    background: var(--granate-dark);
+    padding: 0 20px;
+    height: 64px;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 50;
+    box-shadow: 0 2px 20px rgba(0,0,0,0.2);
+  }
+  .topbar-logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px; font-weight: 600;
+    color: var(--white); letter-spacing: 1px;
+  }
+  .topbar-logo span { color: var(--gold); }
+  .topbar-user {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .avatar {
+    width: 34px; height: 34px;
+    background: var(--granate-light);
+    border: 2px solid var(--gold);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 500; color: white;
+    cursor: pointer;
+  }
+
+  /* ── CONTENT AREA ── */
+  .content {
+    flex: 1;
+    padding-bottom: 90px;
+    animation: fadeUp 0.4s ease;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── HERO ── */
+  .hero {
+    background: linear-gradient(135deg, var(--granate-dark) 0%, var(--granate) 60%, var(--granate-light) 100%);
+    padding: 40px 20px 48px;
+    position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; top: -40px; right: -40px;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    border: 40px solid rgba(201,168,76,0.1);
+  }
+  .hero::after {
+    content: '';
+    position: absolute; bottom: -20px; left: -20px;
+    width: 120px; height: 120px;
+    border-radius: 50%;
+    border: 25px solid rgba(255,255,255,0.04);
+  }
+  .hero-eyebrow {
+    font-size: 10px; letter-spacing: 3px;
+    color: var(--gold); text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .hero-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 34px; font-weight: 400;
+    color: white; line-height: 1.2;
+    margin-bottom: 8px;
+  }
+  .hero-date {
+    font-size: 13px; color: rgba(255,255,255,0.6);
+    margin-bottom: 28px;
+  }
+  .hero-stats {
+    display: flex; gap: 24px;
+  }
+  .stat {
+    text-align: center;
+  }
+  .stat-n {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px; font-weight: 600;
+    color: var(--gold); line-height: 1;
+  }
+  .stat-l {
+    font-size: 10px; letter-spacing: 1px;
+    color: rgba(255,255,255,0.5); text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  /* ── SECTIONS ── */
+  .section { padding: 24px 20px 0; }
+  .section-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .section-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px; font-weight: 600;
+    color: var(--granate-dark);
+  }
+  .section-link {
+    font-size: 12px; color: var(--granate);
+    text-decoration: none; letter-spacing: 0.5px;
+    cursor: pointer;
+  }
+
+  /* ── QUICK ACTIONS ── */
+  .quick-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 12px; padding: 0 20px; margin-top: 24px;
+  }
+  .quick-item {
+    background: white;
+    border-radius: 14px;
+    padding: 16px 8px;
+    text-align: center;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(123,29,46,0.06);
+  }
+  .quick-item:hover, .quick-item.active-nav {
+    background: var(--granate);
+    border-color: var(--granate);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+  }
+  .quick-item:hover .qi-icon,
+  .quick-item.active-nav .qi-icon { filter: brightness(10); }
+  .quick-item:hover .qi-label,
+  .quick-item.active-nav .qi-label { color: rgba(255,255,255,0.8); }
+  .qi-icon { font-size: 22px; margin-bottom: 6px; }
+  .qi-label {
+    font-size: 10px; letter-spacing: 0.5px;
+    color: var(--text-mid);
+    font-weight: 500;
+  }
+
+  /* ── AGENDA CARDS ── */
+  .agenda-list { display: flex; flex-direction: column; gap: 12px; }
+  .agenda-card {
+    background: white;
+    border-radius: 14px;
+    padding: 16px;
+    border: 1px solid var(--border);
+    display: flex; gap: 14px;
+    box-shadow: 0 2px 8px rgba(123,29,46,0.05);
+    transition: transform 0.2s;
+  }
+  .agenda-card:hover { transform: translateX(4px); }
+  .agenda-time {
+    min-width: 56px; text-align: center;
+    padding-top: 2px;
+  }
+  .time-hour {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 20px; font-weight: 600;
+    color: var(--granate); line-height: 1;
+  }
+  .time-min {
+    font-size: 11px; color: var(--text-light);
+  }
+  .agenda-divider {
+    width: 2px; background: var(--granate-pale);
+    border-radius: 2px; position: relative;
+  }
+  .agenda-divider::before {
+    content: '';
+    position: absolute; top: 4px; left: -4px;
+    width: 10px; height: 10px;
+    background: var(--granate);
+    border-radius: 50%;
+  }
+  .agenda-body { flex: 1; }
+  .agenda-tag {
+    display: inline-block;
+    font-size: 9px; letter-spacing: 1.5px;
+    text-transform: uppercase; font-weight: 500;
+    padding: 3px 8px; border-radius: 20px;
+    margin-bottom: 6px;
+  }
+  .tag-ponencia { background: var(--granate-pale); color: var(--granate); }
+  .tag-taller { background: #FFF3CD; color: #856404; }
+  .tag-pausa { background: #E8F5E9; color: #2E7D32; }
+  .tag-mesa { background: #E3F2FD; color: #1565C0; }
+  .agenda-card-title {
+    font-size: 14px; font-weight: 500;
+    color: var(--text); margin-bottom: 4px; line-height: 1.3;
+  }
+  .agenda-speaker {
+    font-size: 12px; color: var(--text-light);
+  }
+
+  /* ── INSCRIPCIÓN FORM ── */
+  .form-card {
+    background: white; border-radius: 16px;
+    padding: 24px; border: 1px solid var(--border);
+    box-shadow: 0 2px 8px rgba(123,29,46,0.05);
+  }
+  .form-group { margin-bottom: 18px; }
+  .form-group label {
+    display: block; font-size: 11px;
+    letter-spacing: 1.5px; text-transform: uppercase;
+    color: var(--text-mid); margin-bottom: 8px;
+    font-weight: 500;
+  }
+  .form-group input, .form-group select, .form-group textarea {
+    width: 100%; padding: 12px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px; color: var(--text);
+    background: var(--cream);
+    outline: none; transition: border 0.2s;
+    appearance: none;
+  }
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus { border-color: var(--granate); background: white; }
+  .form-group textarea { resize: vertical; min-height: 80px; }
+
+  .checkbox-group { display: flex; flex-direction: column; gap: 10px; }
+  .checkbox-item {
+    display: flex; align-items: center; gap: 10px;
+    cursor: pointer;
+  }
+  .checkbox-item input[type=checkbox] {
+    width: 18px; height: 18px; cursor: pointer;
+    accent-color: var(--granate);
+  }
+  .checkbox-item span { font-size: 14px; color: var(--text); }
+
+  .form-submit {
+    width: 100%; padding: 15px;
+    background: var(--granate);
+    border: none; border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px; font-weight: 500;
+    letter-spacing: 1px; text-transform: uppercase;
+    color: white; cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 8px;
+  }
+  .form-submit:hover { background: var(--granate-dark); transform: translateY(-1px); }
+
+  .form-steps {
+    display: flex; gap: 8px; margin-bottom: 24px;
+  }
+  .step-dot {
+    height: 4px; border-radius: 2px;
+    background: var(--granate-pale); flex: 1;
+    transition: background 0.3s;
+  }
+  .step-dot.done { background: var(--granate); }
+
+  /* ── VIDEO CARDS ── */
+  .video-scroll {
+    display: flex; gap: 14px;
+    overflow-x: auto; padding-bottom: 8px;
+    scrollbar-width: none;
+  }
+  .video-scroll::-webkit-scrollbar { display: none; }
+  .video-card {
+    min-width: 200px; border-radius: 14px;
+    overflow: hidden; cursor: pointer;
+    box-shadow: 0 4px 16px rgba(123,29,46,0.1);
+    transition: transform 0.2s;
+  }
+  .video-card:hover { transform: scale(1.03); }
+  .video-thumb {
+    height: 110px;
+    background: linear-gradient(135deg, var(--granate-dark), var(--granate-light));
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+  }
+  .play-btn {
+    width: 40px; height: 40px;
+    background: rgba(255,255,255,0.9);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; color: var(--granate);
+  }
+  .video-duration {
+    position: absolute; bottom: 8px; right: 8px;
+    background: rgba(0,0,0,0.6);
+    color: white; font-size: 10px;
+    padding: 2px 6px; border-radius: 4px;
+  }
+  .video-info { background: white; padding: 12px; }
+  .video-title {
+    font-size: 13px; font-weight: 500;
+    color: var(--text); margin-bottom: 4px;
+    line-height: 1.3;
+  }
+  .video-speaker { font-size: 11px; color: var(--text-light); }
+
+  /* ── DOCS ── */
+  .doc-list { display: flex; flex-direction: column; gap: 10px; }
+  .doc-item {
+    background: white; border-radius: 12px;
+    padding: 14px 16px;
+    display: flex; align-items: center; gap: 14px;
+    border: 1px solid var(--border);
+    cursor: pointer; transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(123,29,46,0.04);
+  }
+  .doc-item:hover { border-color: var(--granate); transform: translateX(4px); }
+  .doc-icon {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+  }
+  .doc-icon.pdf { background: #FDECEA; }
+  .doc-icon.ppt { background: #FFF3E0; }
+  .doc-icon.word { background: #E3F2FD; }
+  .doc-body { flex: 1; }
+  .doc-name { font-size: 14px; font-weight: 500; color: var(--text); }
+  .doc-meta { font-size: 11px; color: var(--text-light); margin-top: 2px; }
+  .doc-arrow { font-size: 16px; color: var(--text-light); }
+
+  /* ── NEWS ── */
+  .news-list { display: flex; flex-direction: column; gap: 14px; }
+  .news-card {
+    background: white; border-radius: 14px;
+    overflow: hidden; border: 1px solid var(--border);
+    box-shadow: 0 2px 8px rgba(123,29,46,0.05);
+    cursor: pointer; transition: transform 0.2s;
+  }
+  .news-card:hover { transform: translateY(-2px); }
+  .news-banner {
+    height: 6px; background: linear-gradient(90deg, var(--granate), var(--gold));
+  }
+  .news-body { padding: 16px; }
+  .news-cat {
+    font-size: 9px; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--granate);
+    font-weight: 600; margin-bottom: 8px;
+  }
+  .news-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 18px; font-weight: 600;
+    color: var(--text); line-height: 1.3; margin-bottom: 8px;
+  }
+  .news-excerpt { font-size: 13px; color: var(--text-mid); line-height: 1.5; }
+  .news-footer {
+    padding: 10px 16px 14px;
+    display: flex; justify-content: space-between;
+    align-items: center;
+  }
+  .news-date { font-size: 11px; color: var(--text-light); }
+  .news-more { font-size: 12px; color: var(--granate); font-weight: 500; }
+
+  /* ── BOTTOM NAV ── */
+  .bottom-nav {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: white;
+    border-top: 1px solid var(--border);
+    display: flex;
+    padding: 8px 0 env(safe-area-inset-bottom, 8px);
+    z-index: 50;
+    box-shadow: 0 -4px 20px rgba(123,29,46,0.08);
+  }
+  .nav-item {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 6px 0; cursor: pointer;
+    transition: all 0.2s; gap: 4px;
+  }
+  .nav-icon { font-size: 20px; transition: transform 0.2s; }
+  .nav-label {
+    font-size: 9px; letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--text-light); font-weight: 500;
+    transition: color 0.2s;
+  }
+  .nav-item.active .nav-label { color: var(--granate); }
+  .nav-item.active .nav-icon { transform: translateY(-2px); }
+
+  /* ── PAGE PANELS ── */
+  .page { display: none; }
+  .page.active { display: block; animation: fadeUp 0.3s ease; }
+
+  /* ── SUCCESS TOAST ── */
+  .toast {
+    position: fixed; top: 80px; left: 50%; transform: translateX(-50%) translateY(-20px);
+    background: var(--granate-dark);
+    color: white; padding: 12px 24px; border-radius: 30px;
+    font-size: 13px; font-weight: 500;
+    opacity: 0; transition: all 0.4s;
+    z-index: 200; white-space: nowrap;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ── BADGE ── */
+  .badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 18px; height: 18px; border-radius: 50%;
+    background: var(--gold); color: var(--granate-dark);
+    font-size: 9px; font-weight: 700;
+    position: absolute; top: -4px; right: 8px;
+  }
+  .nav-item { position: relative; }
+
+  /* ── PROFILE ── */
+  .profile-header {
+    background: linear-gradient(135deg, var(--granate-dark), var(--granate));
+    padding: 36px 20px 28px;
+    text-align: center;
+  }
+  .profile-avatar {
+    width: 72px; height: 72px;
+    background: rgba(255,255,255,0.15);
+    border: 3px solid var(--gold);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px; color: white;
+    margin: 0 auto 12px;
+  }
+  .profile-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 24px; color: white; font-weight: 400;
+  }
+  .profile-role { font-size: 12px; color: var(--gold); letter-spacing: 1px; margin-top: 4px; }
+  .profile-list { padding: 20px; }
+  .profile-item {
+    display: flex; align-items: center; gap: 14px;
+    padding: 16px; background: white; border-radius: 12px;
+    margin-bottom: 10px; cursor: pointer;
+    border: 1px solid var(--border);
+    transition: all 0.2s;
+  }
+  .profile-item:hover { border-color: var(--granate); }
+  .profile-item-icon { font-size: 20px; width: 32px; text-align: center; }
+  .profile-item-text { flex: 1; font-size: 14px; color: var(--text); }
+  .profile-item-arrow { color: var(--text-light); font-size: 16px; }
+
+  .divider { height: 1px; background: var(--border); margin: 20px 20px 0; }
+</style>
+</head>
+<body>
+
+<!-- SPLASH / LOGIN -->
+<div id="splash">
+  <div class="splash-ornament"></div>
+  <div class="splash-title">Congreso<br>Anual 2025</div>
+  <div class="splash-sub">Jornada de Formación</div>
+  <div class="login-box">
+    <div class="form-group" style="margin-bottom:16px">
+      <label>Correo electrónico</label>
+      <input type="email" placeholder="nombre@empresa.com" id="loginEmail">
+    </div>
+    <div class="form-group" style="margin-bottom:24px">
+      <label>Contraseña</label>
+      <input type="password" placeholder="••••••••" id="loginPass">
+    </div>
+    <button class="btn-primary" onclick="doLogin()">Acceder al Congreso</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- APP -->
+<div id="app">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-logo">C<span>·</span>2025</div>
+    <div class="topbar-user">
+      <div class="avatar" onclick="showPage('perfil')">MA</div>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- HOME PAGE -->
+    <div class="page active" id="page-home">
+      <div class="hero">
+        <div class="hero-eyebrow">📍 Madrid · 14–15 Nov 2025</div>
+        <div class="hero-title">Bienvenida,<br>María Antón</div>
+        <div class="hero-date">Tu inscripción está confirmada ✓</div>
+        <div class="hero-stats">
+          <div class="stat"><div class="stat-n">18</div><div class="stat-l">Ponencias</div></div>
+          <div class="stat"><div class="stat-n">6</div><div class="stat-l">Talleres</div></div>
+          <div class="stat"><div class="stat-n">540</div><div class="stat-l">Asistentes</div></div>
+        </div>
+      </div>
+
+      <div class="quick-grid">
+        <div class="quick-item" onclick="showPage('agenda')">
+          <div class="qi-icon">📅</div>
+          <div class="qi-label">Agenda</div>
+        </div>
+        <div class="quick-item" onclick="showPage('inscripcion')">
+          <div class="qi-icon">✍️</div>
+          <div class="qi-label">Inscripción</div>
+        </div>
+        <div class="quick-item" onclick="showPage('formacion')">
+          <div class="qi-icon">🎥</div>
+          <div class="qi-label">Formación</div>
+        </div>
+        <div class="quick-item" onclick="showPage('docs')">
+          <div class="qi-icon">📁</div>
+          <div class="qi-label">Docs</div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header">
+          <div class="section-title">Hoy en agenda</div>
+          <span class="section-link" onclick="showPage('agenda')">Ver todo →</span>
+        </div>
+        <div class="agenda-list">
+          <div class="agenda-card">
+            <div class="agenda-time"><div class="time-hour">09</div><div class="time-min">:00</div></div>
+            <div class="agenda-divider"></div>
+            <div class="agenda-body">
+              <div class="agenda-tag tag-ponencia">Ponencia</div>
+              <div class="agenda-card-title">Apertura institucional y presentación del programa</div>
+              <div class="agenda-speaker">Presidencia del comité organizador</div>
+            </div>
+          </div>
+          <div class="agenda-card">
+            <div class="agenda-time"><div class="time-hour">10</div><div class="time-min">:30</div></div>
+            <div class="agenda-divider"></div>
+            <div class="agenda-body">
+              <div class="agenda-tag tag-taller">Taller</div>
+              <div class="agenda-card-title">Metodologías ágiles en entornos corporativos</div>
+              <div class="agenda-speaker">Dra. Isabel Ramos · Sala A</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section" style="margin-top:24px">
+        <div class="section-header">
+          <div class="section-title">Últimas noticias</div>
+          <span class="section-link" onclick="showPage('noticias')">Ver todo →</span>
+        </div>
+        <div class="news-card" style="margin-bottom:0">
+          <div class="news-banner"></div>
+          <div class="news-body">
+            <div class="news-cat">Organización</div>
+            <div class="news-title">El aforo del congreso se amplía a 540 participantes</div>
+            <div class="news-excerpt">Ante la gran demanda recibida, la organización ha habilitado espacios adicionales...</div>
+          </div>
+          <div class="news-footer">
+            <div class="news-date">10 oct 2025</div>
+            <div class="news-more">Leer más</div>
+          </div>
+        </div>
+      </div>
+      <div style="height:24px"></div>
+    </div>
+
+    <!-- AGENDA PAGE -->
+    <div class="page" id="page-agenda">
+      <div style="background:var(--granate-dark);padding:24px 20px 20px">
+        <div style="font-size:11px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin-bottom:6px">Programa completo</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:28px;color:white;font-weight:400">Agenda</div>
+      </div>
+      <div style="display:flex;gap:8px;padding:16px 20px;overflow-x:auto;scrollbar-width:none">
+        <div style="padding:8px 18px;background:var(--granate);color:white;border-radius:20px;font-size:12px;font-weight:500;white-space:nowrap;cursor:pointer">14 Nov · Día 1</div>
+        <div style="padding:8px 18px;background:white;color:var(--text-mid);border:1px solid var(--border);border-radius:20px;font-size:12px;font-weight:500;white-space:nowrap;cursor:pointer">15 Nov · Día 2</div>
+      </div>
+      <div class="section" style="padding-top:0">
+        <div class="agenda-list">
+          <div class="agenda-card"><div class="agenda-time"><div class="time-hour">09</div><div class="time-min">:00</div></div><div class="agenda-divider"></div><div class="agenda-body"><div class="agenda-tag tag-ponencia">Ponencia</div><div class="agenda-card-title">Apertura institucional</div><div class="agenda-speaker">Comité organizador · Auditorio principal</div></div></div>
+          <div class="agenda-card"><div class="agenda-time"><div class="time-hour">10</div><div class="time-min">:00</div></div><div class="agenda-divider"></div><div class="agenda-body"><div class="agenda-tag tag-ponencia">Ponencia</div><div class="agenda-card-title">Tendencias del sector: horizonte 2030</div><div class="agenda-speaker">Prof. Carlos Mendoza · Auditorio</div></div></div>
+          <div class="agenda-card"><div class="agenda-time"><div class="time-hour">11</div><div class="time-min">:30</div></div><div class="agenda-divider"></div><div class="agenda-body"><div class="agenda-tag tag-pausa">Pausa café</div><div class="agenda-card-title">Descanso y networking</div><div class="agenda-speaker">Hall principal</div></div></div>
+          <div class="agenda-card"><div class="agenda-time"><div class="time-hour">12</div><div class="time-min">:00</div></div><div class="agenda-divider"></div><div class="agenda-body"><div class="agenda-tag tag-taller">Taller</div><div class="agenda-card-title">Metodologías ágiles en entornos corporativos</div><div class="agenda-speaker">Dra. Isabel Ramos · Sala A</div></div></div>
+          <div class="agenda-card"><div class="agenda-time"><div class="time-hour">14</div><div class="time-min">:00</div></div><div class="agenda-divider"></div><div class="agenda-body"><div class="agenda-tag tag-pausa">Comida</div><div class="agenda-card-title">Almuerzo de trabajo</div><div class="agenda-speaker">Restaurante del recinto</div></div></div>
+          <div class="agenda-card"><div class="agenda-time"><div class="time-hour">16</div><div class="time-min">:00</div></div><div class="agenda-divider"></div><div class="agenda-body"><div class="agenda-tag tag-mesa">Mesa redonda</div><div class="agenda-card-title">Debate: Innovación vs tradición en el sector</div><div class="agenda-speaker">Panel de expertos · Auditorio</div></div></div>
+          <div class="agenda-card"><div class="agenda-time"><div class="time-hour">18</div><div class="time-min">:00</div></div><div class="agenda-divider"></div><div class="agenda-body"><div class="agenda-tag tag-ponencia">Clausura</div><div class="agenda-card-title">Cierre de jornada y presentación día 2</div><div class="agenda-speaker">Comité organizador</div></div></div>
+        </div>
+      </div>
+      <div style="height:24px"></div>
+    </div>
+
+    <!-- INSCRIPCIÓN PAGE -->
+    <div class="page" id="page-inscripcion">
+      <div style="background:var(--granate-dark);padding:24px 20px 20px">
+        <div style="font-size:11px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin-bottom:6px">Registro</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:28px;color:white;font-weight:400">Inscripción</div>
+      </div>
+      <div class="section">
+        <div class="form-steps">
+          <div class="step-dot done" id="step1"></div>
+          <div class="step-dot done" id="step2"></div>
+          <div class="step-dot" id="step3"></div>
+        </div>
+        <div class="form-card">
+          <div style="font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--granate-dark);margin-bottom:20px;font-weight:600">Datos personales</div>
+          <div class="form-group">
+            <label>Nombre completo</label>
+            <input type="text" value="María Antón González" placeholder="Nombre y apellidos">
+          </div>
+          <div class="form-group">
+            <label>Empresa / Organización</label>
+            <input type="text" placeholder="Nombre de tu empresa">
+          </div>
+          <div class="form-group">
+            <label>Cargo</label>
+            <input type="text" placeholder="Tu puesto actual">
+          </div>
+          <div class="form-group">
+            <label>Teléfono de contacto</label>
+            <input type="tel" placeholder="+34 600 000 000">
+          </div>
+          <div style="height:1px;background:var(--border);margin:20px 0"></div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--granate-dark);margin-bottom:20px;font-weight:600">🍽 Preferencias de comida</div>
+          <div class="form-group">
+            <label>Asistencia a comidas</label>
+            <select>
+              <option>Ambos días (14 y 15 Nov)</option>
+              <option>Solo día 1 (14 Nov)</option>
+              <option>Solo día 2 (15 Nov)</option>
+              <option>No asistiré a las comidas</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Tipo de menú</label>
+            <select>
+              <option>Menú estándar</option>
+              <option>Menú vegetariano</option>
+              <option>Menú vegano</option>
+              <option>Menú sin gluten</option>
+              <option>Menú sin lactosa</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Alergias e intolerancias</label>
+            <div class="checkbox-group">
+              <label class="checkbox-item"><input type="checkbox"> <span>🌾 Gluten (Celiaquía)</span></label>
+              <label class="checkbox-item"><input type="checkbox"> <span>🥛 Lactosa</span></label>
+              <label class="checkbox-item"><input type="checkbox"> <span>🥜 Frutos secos</span></label>
+              <label class="checkbox-item"><input type="checkbox"> <span>🦐 Mariscos y crustáceos</span></label>
+              <label class="checkbox-item"><input type="checkbox"> <span>🥚 Huevo</span></label>
+              <label class="checkbox-item"><input type="checkbox"> <span>🐟 Pescado</span></label>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Otras indicaciones alimentarias</label>
+            <textarea placeholder="Especifica cualquier otra restricción o necesidad especial..."></textarea>
+          </div>
+          <div style="height:1px;background:var(--border);margin:20px 0"></div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--granate-dark);margin-bottom:20px;font-weight:600">📋 Talleres opcionales</div>
+          <div class="form-group">
+            <label>Selecciona hasta 2 talleres</label>
+            <div class="checkbox-group">
+              <label class="checkbox-item"><input type="checkbox" checked> <span>Metodologías ágiles (12:00 · Sala A)</span></label>
+              <label class="checkbox-item"><input type="checkbox"> <span>Comunicación efectiva (12:00 · Sala B)</span></label>
+              <label class="checkbox-item"><input type="checkbox"> <span>Liderazgo transformacional (16:30 · Sala A)</span></label>
+              <label class="checkbox-item"><input type="checkbox"> <span>Transformación digital (16:30 · Sala B)</span></label>
+            </div>
+          </div>
+          <button class="form-submit" onclick="showToast('✅ Inscripción guardada correctamente')">Confirmar inscripción</button>
+        </div>
+      </div>
+      <div style="height:24px"></div>
+    </div>
+
+    <!-- FORMACIÓN / VÍDEOS PAGE -->
+    <div class="page" id="page-formacion">
+      <div style="background:var(--granate-dark);padding:24px 20px 20px">
+        <div style="font-size:11px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin-bottom:6px">Recursos</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:28px;color:white;font-weight:400">Formación</div>
+      </div>
+
+      <div class="section">
+        <div class="section-header"><div class="section-title">Vídeos destacados</div></div>
+        <div class="video-scroll">
+          <div class="video-card">
+            <div class="video-thumb" style="background:linear-gradient(135deg,#550F1C,#9B2D3E)">
+              <div class="play-btn">▶</div>
+              <div class="video-duration">42:18</div>
+            </div>
+            <div class="video-info">
+              <div class="video-title">Introducción a la jornada 2024</div>
+              <div class="video-speaker">Dr. Roberto Sanz</div>
+            </div>
+          </div>
+          <div class="video-card">
+            <div class="video-thumb" style="background:linear-gradient(135deg,#1a3a6b,#2d5ea6)">
+              <div class="play-btn">▶</div>
+              <div class="video-duration">28:44</div>
+            </div>
+            <div class="video-info">
+              <div class="video-title">Innovación en el sector público</div>
+              <div class="video-speaker">Dra. Carmen López</div>
+            </div>
+          </div>
+          <div class="video-card">
+            <div class="video-thumb" style="background:linear-gradient(135deg,#2d4a22,#4a7a35)">
+              <div class="play-btn">▶</div>
+              <div class="video-duration">55:02</div>
+            </div>
+            <div class="video-info">
+              <div class="video-title">Mesa redonda: Retos 2025</div>
+              <div class="video-speaker">Panel de expertos</div>
+            </div>
+          </div>
+          <div class="video-card">
+            <div class="video-thumb" style="background:linear-gradient(135deg,#4a2d0f,#8a5a20)">
+              <div class="play-btn">▶</div>
+              <div class="video-duration">19:30</div>
+            </div>
+            <div class="video-info">
+              <div class="video-title">Taller: Herramientas digitales</div>
+              <div class="video-speaker">Ing. Pablo Torres</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section" style="margin-top:24px">
+        <div class="section-header"><div class="section-title">Cursos de formación</div></div>
+        <div class="doc-list">
+          <div class="doc-item">
+            <div class="doc-icon ppt">📊</div>
+            <div class="doc-body">
+              <div class="doc-name">Módulo 1: Fundamentos</div>
+              <div class="doc-meta">4 lecciones · 2h 15min · SharePoint</div>
+            </div>
+            <div class="doc-arrow">›</div>
+          </div>
+          <div class="doc-item">
+            <div class="doc-icon ppt">📊</div>
+            <div class="doc-body">
+              <div class="doc-name">Módulo 2: Práctica avanzada</div>
+              <div class="doc-meta">6 lecciones · 3h 40min · SharePoint</div>
+            </div>
+            <div class="doc-arrow">›</div>
+          </div>
+          <div class="doc-item">
+            <div class="doc-icon ppt">🎓</div>
+            <div class="doc-body">
+              <div class="doc-name">Evaluación final</div>
+              <div class="doc-meta">20 preguntas · Certificado disponible</div>
+            </div>
+            <div class="doc-arrow">›</div>
+          </div>
+        </div>
+      </div>
+      <div style="height:24px"></div>
+    </div>
+
+    <!-- DOCUMENTOS PAGE -->
+    <div class="page" id="page-docs">
+      <div style="background:var(--granate-dark);padding:24px 20px 20px">
+        <div style="font-size:11px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin-bottom:6px">SharePoint</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:28px;color:white;font-weight:400">Documentos</div>
+      </div>
+      <div class="section">
+        <div style="display:flex;gap:8px;margin-bottom:16px;overflow-x:auto;scrollbar-width:none;padding-bottom:4px">
+          <div style="padding:7px 16px;background:var(--granate);color:white;border-radius:20px;font-size:12px;white-space:nowrap;cursor:pointer">Todos</div>
+          <div style="padding:7px 16px;background:white;color:var(--text-mid);border:1px solid var(--border);border-radius:20px;font-size:12px;white-space:nowrap;cursor:pointer">Ponencias</div>
+          <div style="padding:7px 16px;background:white;color:var(--text-mid);border:1px solid var(--border);border-radius:20px;font-size:12px;white-space:nowrap;cursor:pointer">Talleres</div>
+          <div style="padding:7px 16px;background:white;color:var(--text-mid);border:1px solid var(--border);border-radius:20px;font-size:12px;white-space:nowrap;cursor:pointer">Normativa</div>
+        </div>
+        <div class="doc-list">
+          <div class="doc-item" onclick="showToast('📄 Abriendo en SharePoint...')">
+            <div class="doc-icon pdf">📄</div>
+            <div class="doc-body"><div class="doc-name">Programa oficial del congreso</div><div class="doc-meta">PDF · 2.4 MB · Actualizado 2 oct</div></div>
+            <div class="doc-arrow">›</div>
+          </div>
+          <div class="doc-item" onclick="showToast('📊 Abriendo en SharePoint...')">
+            <div class="doc-icon ppt">📊</div>
+            <div class="doc-body"><div class="doc-name">Presentación apertura institucional</div><div class="doc-meta">PPT · 8.1 MB · Dr. Roberto Sanz</div></div>
+            <div class="doc-arrow">›</div>
+          </div>
+          <div class="doc-item" onclick="showToast('📝 Abriendo en SharePoint...')">
+            <div class="doc-icon word">📝</div>
+            <div class="doc-body"><div class="doc-name">Dossier de bienvenida</div><div class="doc-meta">DOCX · 1.2 MB · Comité organizador</div></div>
+            <div class="doc-arrow">›</div>
+          </div>
+          <div class="doc-item" onclick="showToast('📄 Abriendo en SharePoint...')">
+            <div class="doc-icon pdf">📄</div>
+            <div class="doc-body"><div class="doc-name">Guía del recinto y servicios</div><div class="doc-meta">PDF · 3.7 MB · Logística</div></div>
+            <div class="doc-arrow">›</div>
+          </div>
+          <div class="doc-item" onclick="showToast('📄 Abriendo en SharePoint...')">
+            <div class="doc-icon pdf">📄</div>
+            <div class="doc-body"><div class="doc-name">Normativa de participación</div><div class="doc-meta">PDF · 0.8 MB · RRHH</div></div>
+            <div class="doc-arrow">›</div>
+          </div>
+          <div class="doc-item" onclick="showToast('📊 Abriendo en SharePoint...')">
+            <div class="doc-icon ppt">📊</div>
+            <div class="doc-body"><div class="doc-name">Tendencias del sector 2025</div><div class="doc-meta">PPT · 12.3 MB · Prof. Mendoza</div></div>
+            <div class="doc-arrow">›</div>
+          </div>
+        </div>
+      </div>
+      <div style="height:24px"></div>
+    </div>
+
+    <!-- NOTICIAS PAGE -->
+    <div class="page" id="page-noticias">
+      <div style="background:var(--granate-dark);padding:24px 20px 20px">
+        <div style="font-size:11px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin-bottom:6px">Actualidad</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:28px;color:white;font-weight:400">Noticias</div>
+      </div>
+      <div class="section">
+        <div class="news-list">
+          <div class="news-card">
+            <div class="news-banner"></div>
+            <div class="news-body">
+              <div class="news-cat">Organización</div>
+              <div class="news-title">El aforo del congreso se amplía a 540 participantes</div>
+              <div class="news-excerpt">Ante la excepcional demanda recibida, la organización ha habilitado espacios adicionales para garantizar la mejor experiencia a todos los asistentes.</div>
+            </div>
+            <div class="news-footer"><div class="news-date">10 oct 2025</div><div class="news-more">Leer más →</div></div>
+          </div>
+          <div class="news-card">
+            <div class="news-banner"></div>
+            <div class="news-body">
+              <div class="news-cat">Ponentes</div>
+              <div class="news-title">Confirmados tres nuevos ponentes internacionales</div>
+              <div class="news-excerpt">El comité científico ha incorporado tres expertos de reconocido prestigio internacional que enriquecerán el programa del segundo día.</div>
+            </div>
+            <div class="news-footer"><div class="news-date">5 oct 2025</div><div class="news-more">Leer más →</div></div>
+          </div>
+          <div class="news-card">
+            <div class="news-banner"></div>
+            <div class="news-body">
+              <div class="news-cat">Logística</div>
+              <div class="news-title">Información sobre aparcamiento y accesos al recinto</div>
+              <div class="news-excerpt">Se han habilitado zonas de aparcamiento adicionales y un servicio de lanzadera desde las principales estaciones de transporte.</div>
+            </div>
+            <div class="news-footer"><div class="news-date">1 oct 2025</div><div class="news-more">Leer más →</div></div>
+          </div>
+          <div class="news-card">
+            <div class="news-banner"></div>
+            <div class="news-body">
+              <div class="news-cat">Programa</div>
+              <div class="news-title">Ya disponible el programa definitivo del congreso</div>
+              <div class="news-excerpt">Tras las últimas incorporaciones, el programa definitivo está disponible para descarga en la sección de documentos.</div>
+            </div>
+            <div class="news-footer"><div class="news-date">28 sep 2025</div><div class="news-more">Leer más →</div></div>
+          </div>
+        </div>
+      </div>
+      <div style="height:24px"></div>
+    </div>
+
+    <!-- PERFIL PAGE -->
+    <div class="page" id="page-perfil">
+      <div class="profile-header">
+        <div class="profile-avatar">MA</div>
+        <div class="profile-name">María Antón González</div>
+        <div class="profile-role">Delegada · Inscripción confirmada</div>
+      </div>
+      <div class="profile-list">
+        <div class="profile-item" onclick="showToast('📋 Mi inscripción')">
+          <div class="profile-item-icon">📋</div>
+          <div class="profile-item-text">Mi inscripción y menú</div>
+          <div class="profile-item-arrow">›</div>
+        </div>
+        <div class="profile-item" onclick="showToast('🎫 Acreditación cargando...')">
+          <div class="profile-item-icon">🎫</div>
+          <div class="profile-item-text">Mi acreditación (QR)</div>
+          <div class="profile-item-arrow">›</div>
+        </div>
+        <div class="profile-item" onclick="showPage('formacion')">
+          <div class="profile-item-icon">🎓</div>
+          <div class="profile-item-text">Mis cursos y formaciones</div>
+          <div class="profile-item-arrow">›</div>
+        </div>
+        <div class="profile-item" onclick="showToast('🔔 Notificaciones')">
+          <div class="profile-item-icon">🔔</div>
+          <div class="profile-item-text">Notificaciones push</div>
+          <div class="profile-item-arrow">›</div>
+        </div>
+        <div class="profile-item" onclick="showToast('⚙️ Ajustes')">
+          <div class="profile-item-icon">⚙️</div>
+          <div class="profile-item-text">Ajustes de cuenta</div>
+          <div class="profile-item-arrow">›</div>
+        </div>
+        <div class="divider"></div>
+        <div class="profile-item" style="margin-top:10px;color:var(--granate)" onclick="doLogout()">
+          <div class="profile-item-icon">🚪</div>
+          <div class="profile-item-text" style="color:var(--granate)">Cerrar sesión</div>
+          <div class="profile-item-arrow" style="color:var(--granate)">›</div>
+        </div>
+      </div>
+      <div style="height:24px"></div>
+    </div>
+
+  </div><!-- /content -->
+
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav">
+    <div class="nav-item active" id="nav-home" onclick="showPage('home')">
+      <div class="nav-icon">🏠</div>
+      <div class="nav-label">Inicio</div>
+    </div>
+    <div class="nav-item" id="nav-agenda" onclick="showPage('agenda')">
+      <div class="nav-icon">📅</div>
+      <div class="nav-label">Agenda</div>
+    </div>
+    <div class="nav-item" id="nav-inscripcion" onclick="showPage('inscripcion')">
+      <div class="nav-icon">✍️</div>
+      <div class="nav-label">Registro</div>
+      <span class="badge">!</span>
+    </div>
+    <div class="nav-item" id="nav-formacion" onclick="showPage('formacion')">
+      <div class="nav-icon">🎥</div>
+      <div class="nav-label">Formación</div>
+    </div>
+    <div class="nav-item" id="nav-noticias" onclick="showPage('noticias')">
+      <div class="nav-icon">📰</div>
+      <div class="nav-label">Noticias</div>
+    </div>
+  </div>
+
+</div><!-- /app -->
+
+<script>
+  function doLogin() {
+    const email = document.getElementById('loginEmail').value;
+    const pass = document.getElementById('loginPass').value;
+    if (!email && !pass) {
+      // demo: allow empty login
+    }
+    document.getElementById('splash').classList.add('hidden');
+    setTimeout(() => {
+      document.getElementById('splash').style.display = 'none';
+      document.getElementById('app').classList.add('visible');
+    }, 600);
+  }
+
+  function doLogout() {
+    document.getElementById('app').classList.remove('visible');
+    document.getElementById('splash').style.display = 'flex';
+    setTimeout(() => document.getElementById('splash').classList.remove('hidden'), 10);
+  }
+
+  function showPage(name) {
+    // hide all pages
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    
+    document.getElementById('page-' + name)?.classList.add('active');
+    document.getElementById('nav-' + name)?.classList.add('active');
+    
+    // scroll to top
+    document.querySelector('.content').scrollTo(0, 0);
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+  // Allow Enter key on login
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && document.getElementById('splash').style.display !== 'none') {
+      doLogin();
+    }
+  });
+</script>
+</body>
+</html>
